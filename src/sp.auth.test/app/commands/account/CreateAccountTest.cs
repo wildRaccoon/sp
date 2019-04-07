@@ -8,6 +8,9 @@ namespace sp.auth.test.app.commands.account
     [TestFixture]
     public class CreateAccountTest
     {
-        public
+        [Test]
+        public void AAA()
+        {
+        }
     }
 }
