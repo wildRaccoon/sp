@@ -8,9 +8,16 @@
 
   <ItemGroup>
     <PackageReference Include="Moq" Version="4.10.1" />
+    <PackageReference Include="FluentValidation" Version="8.2.2" />
+    <PackageReference Include="mediatr" Version="6.0.0" />
     <PackageReference Include="nunit" Version="3.11.0" />
     <PackageReference Include="NUnit3TestAdapter" Version="3.13.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.2.3"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\sp.auth\sp.auth.csproj" />
   </ItemGroup>
 
 </Project>
