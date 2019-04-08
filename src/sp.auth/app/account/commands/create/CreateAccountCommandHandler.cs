@@ -6,9 +6,9 @@ using MediatR;
 using sp.auth.app.interfaces;
 using sp.auth.domain.account;
 using sp.auth.domain.account.events;
-using sp.auth.app.ef;
+using sp.auth.app.infra.ef;
 
-namespace sp.auth.app.commands.account.create
+namespace sp.auth.app.account.commands.create
 {
     public class CreateAccountCommandHandler : IRequestHandler<CreateAccountCommand, bool>
     {

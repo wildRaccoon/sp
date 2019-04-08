@@ -2,7 +2,7 @@ using FluentValidation;
 using System;
 using System.Linq;
 
-namespace sp.auth.app.commands.account.create
+namespace sp.auth.app.account.commands.create
 {
     public class CreateAccountCommandValidator : AbstractValidator<CreateAccountCommand>
     {

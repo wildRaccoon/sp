@@ -1,7 +1,7 @@
 using System;
 using MediatR;
 
-namespace sp.auth.app.commands.account.create
+namespace sp.auth.app.account.commands.create
 {
     public class CreateAccountCommand : IRequest<bool>
     { 

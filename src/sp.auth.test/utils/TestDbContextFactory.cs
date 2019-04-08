@@ -1,6 +1,6 @@
 using System;
 using Microsoft.EntityFrameworkCore;
-using sp.auth.app.ef;
+using sp.auth.app.infra.ef;
 
 namespace sp.auth.test.utils
 {

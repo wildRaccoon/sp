@@ -1,7 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using sp.auth.domain.account;
 
-namespace sp.auth.app.ef
+namespace sp.auth.app.infra.ef
 {
     public class AuthDataContext : DbContext
     {
