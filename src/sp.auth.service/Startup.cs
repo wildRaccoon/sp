@@ -2,16 +2,25 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using FluentValidation.AspNetCore;
 using FluentValidation.Validators;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Connections;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.IdentityModel.Tokens;
 using sp.auth.app.infra.config;
 using sp.auth.persistence;
+using MediatR;
+using Microsoft.EntityFrameworkCore;
+using sp.auth.app.infra.ef;
+using sp.auth.service.filters;
 
 namespace sp.auth.service
 {
@@ -36,14 +45,32 @@ namespace sp.auth.service
         {
             services.AddSingleton(_conf)
                 .AddLogging()
+                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(ac =>
+                {
+                    ac.TokenValidationParameters = new TokenValidationParameters()
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = "sp.auth",
+                        
+                        ValidateLifetime = true,
+                        
+                        IssuerSigningKey = new JsonWebKey(),
+                        ValidateIssuerSigningKey = true
+                    };
+                });
+
+            services
+                .AddDbContext<AuthDataContext>(db => db.UseInMemoryDatabase("sp.auth"))
                 .AddSpAuthServices(_conf)
                 .AddCors(
                     co => co.AddPolicy(
-                        "AllowAll", 
+                        "AllowAll",
                         p => p.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().AllowCredentials()
-                        )
                     )
-                .AddMvc();
+                )
+                .AddMvc(opt => opt.Filters.Add<CustomExceptionFilterAttribute>())
+                .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<SpAuthConfig>());
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -58,6 +85,7 @@ namespace sp.auth.service
             loggerFactory.AddConsole(LogLevel.Debug);
             #endif
 
+            app.UseAuthentication();
             app.UseCors();
             app.UseMvc(routes => routes.MapRoute(
                 name:"default",

@@ -33,7 +33,11 @@ namespace sp.auth.test.app.commands.account
 
             var cmd = new CreateAccountCommandHandler(mediator.Object, testFixture.Context, hashService.Object);
 
-            var cmdArgs = new CreateAccountCommand("alias", "adf@email.com", "Asdfg!@21234");
+            var cmdArgs = new CreateAccountCommand(){
+                Alias = "alias", 
+                Email = "adf@email.com", 
+                Password = "Asdfg!@21234"
+            };
             
             Assert.DoesNotThrowAsync(async () => await cmd.Handle(cmdArgs, ct));
         }
@@ -59,7 +63,11 @@ namespace sp.auth.test.app.commands.account
 
             var cmd = new CreateAccountCommandHandler(mediator.Object, dbContext, hashService.Object);
 
-            var cmdArgs = new CreateAccountCommand("alias", "adf@email.com", "Asdfg!@21234");
+            var cmdArgs = new CreateAccountCommand(){  
+                Alias = "alias",
+                Email = "adf@email.com", 
+                Password = "Asdfg!@21234"
+            };
 
             Assert.ThrowsAsync<UnableCreateAccountException>(async () => await cmd.Handle(cmdArgs, ct));
         }
@@ -86,7 +94,11 @@ namespace sp.auth.test.app.commands.account
 
             var cmd = new CreateAccountCommandHandler(mediator.Object, dbContext, hashService.Object);
 
-            var cmdArgs = new CreateAccountCommand("alias", "adf@email.com", "Asdfg!@21234");
+            var cmdArgs = new CreateAccountCommand(){
+                Alias = "alias", 
+                Email = "adf@email.com", 
+                Password = "Asdfg!@21234"
+            };
             
             Assert.ThrowsAsync<UnableCreateAccountException>(async () => await cmd.Handle(cmdArgs, ct));
         }

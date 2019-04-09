@@ -5,15 +5,8 @@ namespace sp.auth.app.account.commands.create
 {
     public class CreateAccountCommand : IRequest<Unit>
     { 
-        public string Alias { get; }
-        public string Email { get; }
-        public string Password { get; }
-
-        public CreateAccountCommand(string alias, string email, string pass)
-        {
-            Alias = alias;
-            Email = email;
-            Password = pass;
-        }
+        public string Alias { get; set; }
+        public string Email { get; set; }
+        public string Password { get; set; }
     }
 }

@@ -9,17 +9,23 @@ namespace sp.auth.app.account.commands.create
         public CreateAccountCommandValidator()
         {
             RuleFor(x => x.Alias)
-            .MaximumLength(50)
-            .NotEmpty();
+            .NotNull()
+            .NotEmpty()
+            .MaximumLength(50);
             
             RuleFor(x => x.Password)
-            .MaximumLength(50)
-            .NotEmpty();
+            .NotNull()
+            .NotEmpty()
+            .MinimumLength(8)
+            .MaximumLength(50);
 
             RuleFor(x => x.Password)
-            .MinimumLength(8)
-            .MaximumLength(50)
-            .Must(val => { 
+            .Must(val => {
+                if (string.IsNullOrEmpty(val))
+                {
+                    return false;
+                }
+                
                 var check = val.ToCharArray().ToList();
                 
                 var containUpperCase = check.Exists(c => char.IsLetter(c) && char.IsUpper(c));
