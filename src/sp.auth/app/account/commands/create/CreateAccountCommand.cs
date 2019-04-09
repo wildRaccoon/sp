@@ -3,7 +3,7 @@ using MediatR;
 
 namespace sp.auth.app.account.commands.create
 {
-    public class CreateAccountCommand : IRequest<bool>
+    public class CreateAccountCommand : IRequest<Unit>
     { 
         public string Alias { get; }
         public string Email { get; }

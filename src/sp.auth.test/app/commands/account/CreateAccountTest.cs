@@ -15,13 +15,14 @@ using System.Linq;
 using System.Linq.Expressions;
 using sp.auth.test.utils;
 using sp.auth.domain.account.events;
+using sp.auth.domain.account.exceptions;
 
 namespace sp.auth.test.app.commands.account
 {
     [TestFixture]
     public class CreateAccountTest
     {
-        
+
         [TestCase()]
         public void Success()
         {
@@ -30,21 +31,19 @@ namespace sp.auth.test.app.commands.account
 
             var mediator = mockFactory.Create<IMediator>();
 
-            mediator.Setup(s => s.Publish(It.IsAny<CreatedAccountDomainEvent>(),It.IsAny<CancellationToken>()))
-                    .Returns(Task.Run(() => {}));
+            mediator.Setup(s => s.Publish(It.IsAny<CreatedAccountDomainEvent>(), It.IsAny<CancellationToken>()))
+                .Returns(Task.Run(() => { }));
 
             var ct = new CancellationToken();
 
             var hashService = mockFactory.Create<IHashService>();
 
-            var cmd = new CreateAccountCommandHandler(mediator.Object,testFixture.Context,hashService.Object);
+            var cmd = new CreateAccountCommandHandler(mediator.Object, testFixture.Context, hashService.Object);
 
-            var cmdArgs = new CreateAccountCommand("alias","adf@email.com","Asdfg!@21234");
+            var cmdArgs = new CreateAccountCommand("alias", "adf@email.com", "Asdfg!@21234");
 
-            var result = cmd.Handle(cmdArgs,ct);
+            var result = cmd.Handle(cmdArgs, ct);
             result.Wait();
-
-            Assert.IsTrue(result.Result);
         }
 
         [TestCase()]
@@ -55,7 +54,8 @@ namespace sp.auth.test.app.commands.account
             var dbContext = testFixture.Context;
             var mockFactory = new MockRepository(MockBehavior.Loose);
 
-            dbContext.Add(new Account(){
+            dbContext.Add(new Account()
+            {
                 Alias = "alias"
             });
             dbContext.SaveChanges();
@@ -65,25 +65,27 @@ namespace sp.auth.test.app.commands.account
 
             var hashService = mockFactory.Create<IHashService>();
 
-            var cmd = new CreateAccountCommandHandler(mediator.Object,dbContext,hashService.Object);
+            var cmd = new CreateAccountCommandHandler(mediator.Object, dbContext, hashService.Object);
 
-            var cmdArgs = new CreateAccountCommand("alias","adf@email.com","Asdfg!@21234");
+            var cmdArgs = new CreateAccountCommand("alias", "adf@email.com", "Asdfg!@21234");
 
-            var result = cmd.Handle(cmdArgs,ct);
-            result.Wait();
-
-            Assert.IsFalse(result.Result);
+            Assert.Throws<UnableCreateAccountException>(() => { 
+                var result = cmd.Handle(cmdArgs, ct);
+                result.Wait();
+            });
         }
 
         [TestCase()]
         public void ExistWitTheSameEmail()
         {
+
             var testFixture = new QueryTestFixture();
 
             var dbContext = testFixture.Context;
             var mockFactory = new MockRepository(MockBehavior.Loose);
 
-            dbContext.Add(new Account(){
+            dbContext.Add(new Account()
+            {
                 Email = "adf@email.com"
             });
             dbContext.SaveChanges();
@@ -93,14 +95,14 @@ namespace sp.auth.test.app.commands.account
 
             var hashService = mockFactory.Create<IHashService>();
 
-            var cmd = new CreateAccountCommandHandler(mediator.Object,dbContext,hashService.Object);
+            var cmd = new CreateAccountCommandHandler(mediator.Object, dbContext, hashService.Object);
 
-            var cmdArgs = new CreateAccountCommand("alias","adf@email.com","Asdfg!@21234");
-
-            var result = cmd.Handle(cmdArgs,ct);
-            result.Wait();
-
-            Assert.IsFalse(result.Result);
+            var cmdArgs = new CreateAccountCommand("alias", "adf@email.com", "Asdfg!@21234");
+            
+            Assert.Throws<AggregateException>(() => { 
+                var result = cmd.Handle(cmdArgs, ct);
+                result.Wait();
+            });
         }
     }
 }

@@ -6,8 +6,10 @@ using FluentValidation.Validators;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using sp.auth.persistence;
 
 namespace sp.auth.service
@@ -31,19 +33,35 @@ namespace sp.auth.service
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddSingleton(_conf);
-            services.AddSpAuthServices();
+            services.AddSingleton(_conf)
+                .AddLogging()
+                .AddSpAuthServices()
+                .AddCors(
+                    co => co.AddPolicy(
+                        "AllowAll", 
+                        p => p.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().AllowCredentials()
+                        )
+                    )
+                .AddMvc();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
-    
-            app.Run(async (context) => { await context.Response.WriteAsync("Hello World!"); });
+            
+            #if DEBUG
+            loggerFactory.AddConsole(LogLevel.Debug);
+            #endif
+
+            app.UseCors();
+            app.UseMvc(routes => routes.MapRoute(
+                name:"default",
+                template:"api/{controller=Auth}/{action=Index}/{id?}"
+            ));
         }
     }
 }

@@ -2,19 +2,21 @@ using System;
 using System.Threading;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 using MediatR;
 using sp.auth.app.interfaces;
 using sp.auth.domain.account;
 using sp.auth.domain.account.events;
 using sp.auth.app.infra.ef;
+using sp.auth.domain.account.exceptions;
 
 namespace sp.auth.app.account.commands.create
 {
-    public class CreateAccountCommandHandler : IRequestHandler<CreateAccountCommand, bool>
+    public class CreateAccountCommandHandler : IRequestHandler<CreateAccountCommand, Unit>
     {
-        AuthDataContext _repo {get;}
-        IHashService _hash {get;}
-        IMediator _mediator {get;}
+        private AuthDataContext _repo {get;}
+        private IHashService _hash {get;}
+        private IMediator _mediator {get;}
 
         public CreateAccountCommandHandler(IMediator mediator, AuthDataContext repo,IHashService hash)
         {
@@ -22,14 +24,14 @@ namespace sp.auth.app.account.commands.create
             _hash = hash ?? throw new ArgumentNullException(nameof(hash));
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
-        public async Task<bool> Handle(CreateAccountCommand request, CancellationToken cancellationToken)
+        public async Task<Unit> Handle(CreateAccountCommand request, CancellationToken cancellationToken)
         {
             //query items with the same Email or Alias
             var chk = _repo.Accounts.Count(x => x.Alias == request.Alias || x.Email == request.Email);
 
             if (chk > 0)
             {
-                return false;
+                throw  new UnableCreateAccountException(request.Alias,request.Email);
             }
 
             var acc = new Account(){
@@ -44,9 +46,9 @@ namespace sp.auth.app.account.commands.create
 
             await _repo.SaveChangesAsync(cancellationToken);
 
-            await _mediator.Publish(new CreatedAccountDomainEvent(acc.Id, acc.CreatedOn));
+            await _mediator.Publish(new CreatedAccountDomainEvent(acc.Id, acc.CreatedOn), cancellationToken);
 
-            return true;
+            return Unit.Value;
         }
     }
 }
