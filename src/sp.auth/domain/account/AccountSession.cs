@@ -10,5 +10,9 @@ namespace sp.auth.domain.account
         public string SessionToken {get; set;}
         
         public DateTime IssuedOn {get; set;}
+        
+        public DateTime SessionExpired {get; set;}
+        
+        public DateTime RenewExpired {get; set;}
     }
 }

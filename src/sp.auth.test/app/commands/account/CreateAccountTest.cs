@@ -1,18 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using MediatR;
+﻿using MediatR;
 using Moq;
 using NUnit.Framework;
 using sp.auth.app.account.commands.create;
-using sp.auth.app.infra.ef;
 using sp.auth.app.interfaces;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
 using sp.auth.domain.account;
-using System.Linq;
-using System.Linq.Expressions;
 using sp.auth.test.utils;
 using sp.auth.domain.account.events;
 using sp.auth.domain.account.exceptions;
@@ -41,9 +34,8 @@ namespace sp.auth.test.app.commands.account
             var cmd = new CreateAccountCommandHandler(mediator.Object, testFixture.Context, hashService.Object);
 
             var cmdArgs = new CreateAccountCommand("alias", "adf@email.com", "Asdfg!@21234");
-
-            var result = cmd.Handle(cmdArgs, ct);
-            result.Wait();
+            
+            Assert.DoesNotThrowAsync(async () => await cmd.Handle(cmdArgs, ct));
         }
 
         [TestCase()]
@@ -69,10 +61,7 @@ namespace sp.auth.test.app.commands.account
 
             var cmdArgs = new CreateAccountCommand("alias", "adf@email.com", "Asdfg!@21234");
 
-            Assert.Throws<UnableCreateAccountException>(() => { 
-                var result = cmd.Handle(cmdArgs, ct);
-                result.Wait();
-            });
+            Assert.ThrowsAsync<UnableCreateAccountException>(async () => await cmd.Handle(cmdArgs, ct));
         }
 
         [TestCase()]
@@ -99,10 +88,7 @@ namespace sp.auth.test.app.commands.account
 
             var cmdArgs = new CreateAccountCommand("alias", "adf@email.com", "Asdfg!@21234");
             
-            Assert.Throws<AggregateException>(() => { 
-                var result = cmd.Handle(cmdArgs, ct);
-                result.Wait();
-            });
+            Assert.ThrowsAsync<UnableCreateAccountException>(async () => await cmd.Handle(cmdArgs, ct));
         }
     }
 }

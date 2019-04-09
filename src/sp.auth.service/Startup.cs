@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using sp.auth.app.infra.config;
 using sp.auth.persistence;
 
 namespace sp.auth.service
@@ -35,7 +36,7 @@ namespace sp.auth.service
         {
             services.AddSingleton(_conf)
                 .AddLogging()
-                .AddSpAuthServices()
+                .AddSpAuthServices(_conf)
                 .AddCors(
                     co => co.AddPolicy(
                         "AllowAll", 

@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using sp.auth.app.infra.config;
 using sp.auth.app.interfaces;
 
 namespace sp.auth.persistence.services.hash
@@ -11,29 +12,22 @@ namespace sp.auth.persistence.services.hash
     public class HashService : IHashService
     {
         private readonly ILogger<HashService> _logger;
+        private readonly HashConfig _hashConfig;
         private HashAlgorithm _hashAlgorithm = null;
 
-        private const string SaltKey = "sp.auth.salt";
-        private readonly string _salt;
-
-        private const string SaltAlgKey = "sp.auth.saltalg";
-        private readonly string _saltAlg;
-
-
-        public HashService(ILogger<HashService> logger, IConfiguration conf)
+        public HashService(ILogger<HashService> logger, HashConfig hashConfig)
         {
             _logger = logger;
-            
-            _salt = conf[SaltKey];
+            _hashConfig = hashConfig ?? throw new ArgumentNullException(nameof(hashConfig));;
 
-            if (string.IsNullOrEmpty(_salt))
+            if (string.IsNullOrEmpty(_hashConfig.salt))
             {
-                throw new KeyNotFoundException($"Salt key not found: {SaltKey}");
+                throw new KeyNotFoundException($"Salt not set in secret: sp.auth.authenticate.Salt");
             }
             
-            _saltAlg = conf[SaltAlgKey] ?? "";
+            var _saltAlg = _hashConfig.algorithm?.ToLower() ?? "";
 
-            switch (_salt)
+            switch (_saltAlg)
             {
                 case "sha256":
                     _hashAlgorithm = SHA256.Create();
@@ -52,7 +46,7 @@ namespace sp.auth.persistence.services.hash
         
         public string Encode(string val)
         {
-            var bytes = Encoding.ASCII.GetBytes($"{val}{_salt}");
+            var bytes = Encoding.ASCII.GetBytes($"{val}{_hashConfig.salt}");
             var hashVal = _hashAlgorithm.ComputeHash(bytes);
             
             var builder = new StringBuilder();  
