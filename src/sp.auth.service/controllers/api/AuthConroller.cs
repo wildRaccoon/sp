@@ -8,11 +8,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using sp.auth.app.account.commands.authenticate;
 using sp.auth.app.account.commands.create;
+using sp.auth.app.infra.config;
 
 namespace sp.auth.service.controllers.api
 {
     [Authorize]
-    public class AuthController : Controller
+    [ApiController]
+    [Route("api/[controller]")]
+    public class AuthController : ControllerBase
     {
         private ILogger<AuthController> _logger { get; set; }
         
@@ -24,14 +27,14 @@ namespace sp.auth.service.controllers.api
             _mediator = mediator;
         }
 
-        [HttpGet]
+        [HttpGet("index")]
         [AllowAnonymous]
         public object Index()
         {
             return "hello";
         }
         
-        [HttpGet]
+        [HttpGet("secured")]
         [Authorize]
         public object Secured()
         {
@@ -48,8 +51,26 @@ namespace sp.auth.service.controllers.api
             
             return sb.ToString();
         }
+        
+        [HttpGet("securedadmin")]
+        [Authorize(Roles = Roles.Admin)]
+        public object SecuredAdmin()
+        {
+            StringBuilder sb = new StringBuilder();
 
-        [HttpPost]
+            sb.Append("you are here\r\n");
+            
+            var claims = HttpContext.User.Claims;
+
+            foreach (var i in claims)
+            {
+                sb.Append($"{i.Type} : {i.Value}\r\n");
+            }
+            
+            return sb.ToString();
+        }
+
+        [HttpPost("create")]
         [AllowAnonymous]
         public async Task<IActionResult> Create([FromBody] CreateAccountCommand cmd)
         {
@@ -58,7 +79,7 @@ namespace sp.auth.service.controllers.api
             return Ok(res);
         }
         
-        [HttpPost]
+        [HttpPost("authenticate")]
         [AllowAnonymous]
         public async Task<IActionResult> Authenticate([FromBody] AuthenticateAccountCommand cmd)
         {
