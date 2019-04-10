@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using FluentValidation.AspNetCore;
 using FluentValidation.Validators;
@@ -43,20 +44,28 @@ namespace sp.auth.service
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            var secret = _conf.GetValue<string>("sp.auth:hash:secret");
+            var key = Encoding.ASCII.GetBytes(secret);
+            
             services.AddSingleton(_conf)
                 .AddLogging()
-                .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddAuthentication(a =>
+                {
+                    a.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+                    a.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+                })
                 .AddJwtBearer(ac =>
                 {
                     ac.TokenValidationParameters = new TokenValidationParameters()
                     {
                         ValidateIssuer = true,
                         ValidIssuer = "sp.auth",
-                        
+                        RequireExpirationTime = true,
                         ValidateLifetime = true,
-                        
-                        IssuerSigningKey = new JsonWebKey(),
-                        ValidateIssuerSigningKey = true
+                        RequireSignedTokens = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(key),
+                        ValidateIssuerSigningKey = true,
+                        ValidateAudience = false
                     };
                 });
 
@@ -69,6 +78,7 @@ namespace sp.auth.service
                         p => p.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().AllowCredentials()
                     )
                 )
+                .AddHttpContextAccessor()
                 .AddMvc(opt => opt.Filters.Add<CustomExceptionFilterAttribute>())
                 .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<SpAuthConfig>());
         }

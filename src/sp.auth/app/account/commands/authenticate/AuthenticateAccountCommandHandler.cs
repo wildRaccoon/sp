@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using sp.auth.app.infra.config;
 using sp.auth.app.infra.ef;
 using sp.auth.app.interfaces;
 using sp.auth.domain.account;
@@ -14,13 +15,16 @@ namespace sp.auth.app.account.commands.authenticate
     public class AuthenticateAccountCommandHandler: IRequestHandler<AuthenticateAccountCommand, Unit>
     {
         private readonly ITokenService _token;
+        
+        private readonly AuthenticateConfig _authConfig;
         private AuthDataContext _repo {get;}
         private IHashService _hash {get;}
         private IMediator _mediator {get;}
         
-        public AuthenticateAccountCommandHandler(IMediator mediator, AuthDataContext repo,IHashService hash,ITokenService token)
+        public AuthenticateAccountCommandHandler(IMediator mediator, AuthDataContext repo,IHashService hash,ITokenService token, AuthenticateConfig authConfig)
         {
             _token = token ?? throw new ArgumentNullException(nameof(token));
+            _authConfig = authConfig ?? throw new ArgumentNullException(nameof(authConfig));
             _repo = repo ?? throw new ArgumentNullException(nameof(repo));
             _hash = hash ?? throw new ArgumentNullException(nameof(hash));
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
@@ -36,18 +40,21 @@ namespace sp.auth.app.account.commands.authenticate
                 throw new UnableAuthoriseAccountException($"Unable to authorise account:{request.Alias}");
             }
 
-            var accSession = new AccountSession()
+            var dtNow = DateTime.Now;
+
+            var session = new AccountSession()
             {
                 AccountId = acc.Id,
                 RenewToken = _token.IssueToken(),
-                SessionToken = _token.IssueToken(),
-                IssuedOn = DateTime.Now
+                IssuedOn = dtNow,
+                SessionExpired = dtNow.AddSeconds(_authConfig.sessionExpiredInSec),
+                RenewExpired = dtNow.AddSeconds(_authConfig.renewExpiredInSec)
             };
 
-            _repo.AccountSessions.Add(accSession);
+            _repo.AccountSessions.Add(session);
             await _repo.SaveChangesAsync(cancellationToken);
 
-            await _mediator.Publish(new AuthenticateSuccessAccountDomainEvent(acc.Id, accSession.IssuedOn), cancellationToken);
+            await _mediator.Publish(new AuthenticateSuccessAccountDomainEvent(acc.Id, session.IssuedOn, session.RenewToken, session.SessionExpired, Roles.Account), cancellationToken);
 
             return Unit.Value;
         }

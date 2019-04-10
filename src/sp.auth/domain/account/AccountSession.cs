@@ -7,12 +7,8 @@ namespace sp.auth.domain.account
         public long Id { get; set; }
         public long AccountId { get; set; }
         public string RenewToken {get; set;}
-        public string SessionToken {get; set;}
-        
         public DateTime IssuedOn {get; set;}
-        
         public DateTime SessionExpired {get; set;}
-        
         public DateTime RenewExpired {get; set;}
     }
 }
