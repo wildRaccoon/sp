@@ -90,10 +90,6 @@ namespace sp.auth.service
             {
                 app.UseDeveloperExceptionPage();
             }
-            
-            #if DEBUG
-            loggerFactory.AddConsole(LogLevel.Debug);
-            #endif
 
             app.UseAuthentication();
             app.UseCors();

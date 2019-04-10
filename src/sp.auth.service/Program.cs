@@ -17,8 +17,13 @@ namespace sp.auth.service
             CreateWebHostBuilder(args).Build().Run();
         }
 
-        public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
+        private static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
             WebHost.CreateDefaultBuilder(args)
+                .ConfigureLogging( lb =>
+                        lb.AddConsole()
+                            .AddDebug()
+                            .SetMinimumLevel(LogLevel.None)
+                    )
                 .UseStartup<Startup>();
     }
 }
