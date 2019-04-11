@@ -1,4 +1,3 @@
-using System;
 using MediatR;
 
 namespace sp.auth.app.account.commands.authenticate

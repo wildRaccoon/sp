@@ -1,6 +1,4 @@
-using System;
 using System.IdentityModel.Tokens.Jwt;
-using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text;
 using System.Threading;
@@ -11,20 +9,20 @@ using Microsoft.IdentityModel.Tokens;
 using sp.auth.app.infra.config;
 using sp.auth.domain.account.events;
 
-namespace sp.auth.app.account.handlers
+namespace sp.auth.persistence.account.handlers
 {
-    public class AuthenticateAccountNotificationHandler : INotificationHandler<AuthenticateSuccessAccountDomainEvent>
+    public class RenewAccountSessionNotificationHandler : INotificationHandler<RenewAccountSessionSuccessDomainEvent>
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly HashConfig _hash;
 
-        public AuthenticateAccountNotificationHandler(IHttpContextAccessor httpContextAccessor, HashConfig hash)
+        public RenewAccountSessionNotificationHandler(IHttpContextAccessor httpContextAccessor, HashConfig hash)
         {
             _httpContextAccessor = httpContextAccessor;
             _hash = hash;
         }
 
-        public async Task Handle(AuthenticateSuccessAccountDomainEvent notification, CancellationToken cancellationToken)
+        public async Task Handle(RenewAccountSessionSuccessDomainEvent notification, CancellationToken cancellationToken)
         {
             var key = Encoding.ASCII.GetBytes(_hash.secret);
             

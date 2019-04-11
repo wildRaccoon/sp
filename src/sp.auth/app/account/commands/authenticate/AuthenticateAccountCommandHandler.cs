@@ -40,6 +40,13 @@ namespace sp.auth.app.account.commands.authenticate
                 throw new UnableAuthoriseAccountException($"Unable to authorise account:{request.Alias}");
             }
 
+            var oldsession = _repo.AccountSessions.SingleOrDefaultAsync(x => x.AccountId == acc.Id);
+
+            if (oldsession != null)
+            {
+                _repo.Remove(oldsession);
+            }
+
             var dtNow = DateTime.Now;
 
             var session = new AccountSession()
