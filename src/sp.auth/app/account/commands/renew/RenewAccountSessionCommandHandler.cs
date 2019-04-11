@@ -43,7 +43,7 @@ namespace sp.auth.app.account.commands.renew
                 throw new RenewAccountSessionException(request.AccountId, $"renew token not equal current:{session.RenewToken} requested:{request.RenewToken}");
             }
 
-            if (session.RenewExpired > DateTime.Now)
+            if (session.RenewExpired < DateTime.Now)
             {
                 throw new RenewAccountSessionException(request.AccountId, $"renew token expired");
             }

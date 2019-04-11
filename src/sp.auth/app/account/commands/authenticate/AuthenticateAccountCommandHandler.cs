@@ -40,7 +40,7 @@ namespace sp.auth.app.account.commands.authenticate
                 throw new UnableAuthoriseAccountException($"Unable to authorise account:{request.Alias}");
             }
 
-            var oldsession = _repo.AccountSessions.SingleOrDefaultAsync(x => x.AccountId == acc.Id);
+            var oldsession = await _repo.AccountSessions.SingleOrDefaultAsync(x => x.AccountId == acc.Id);
 
             if (oldsession != null)
             {

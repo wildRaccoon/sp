@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using sp.auth.app.account.commands.authenticate;
 using sp.auth.app.account.commands.create;
+using sp.auth.app.account.commands.renew;
 using sp.auth.app.infra.config;
 
 namespace sp.auth.service.controllers.api
@@ -82,6 +83,15 @@ namespace sp.auth.service.controllers.api
         [HttpPost("authenticate")]
         [AllowAnonymous]
         public async Task<IActionResult> Authenticate([FromBody] AuthenticateAccountCommand cmd)
+        {
+            var res = await _mediator.Send(cmd);
+
+            return Ok(res);
+        }
+        
+        [HttpPost("renew")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Renew([FromBody] RenewAccountSessionCommand cmd)
         {
             var res = await _mediator.Send(cmd);
 
