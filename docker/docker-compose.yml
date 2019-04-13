@@ -15,7 +15,7 @@ services:
       POSTGRES_PASSWORD: mypass
       POSTGRES_DB: SpAuthDataBase
     ports:
-     - "80:80"
+     - "8081:8081"
     depends_on:
      - db 
   sp.auth:
@@ -23,6 +23,7 @@ services:
     build: .
     environment:
       ASPNETCORE_ENVIRONMENT: Production
+      ASPNETCORE_URLS: http://0.0.0.0:5000
     ports:
      - "5000:5000"
     depends_on:
