@@ -1,0 +1,18 @@
+version: '3'
+services:
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: mypass
+    ports:
+     - "5432:5432"
+  dbweb:
+    image: moritanosuke/docker-pgweb
+    restart: always
+    environment:
+      POSTGRES: db
+      POSTGRES_PASSWORD: mypass
+      POSTGRES_DB: SpAuthDataBase
+    ports:
+     - "8081:8081"

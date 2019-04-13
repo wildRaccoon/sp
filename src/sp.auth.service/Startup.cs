@@ -70,7 +70,10 @@ namespace sp.auth.service
                 });
 
             services
-                .AddDbContext<AuthDataContext>(db => db.UseInMemoryDatabase("sp.auth"))
+                .AddEntityFrameworkNpgsql()
+                .AddDbContext<AuthDataContext>(
+                    opt => opt.UseNpgsql(_conf.GetConnectionString("SpAuthDb"))
+                )
                 .AddSpAuthServices(_conf)
                 .AddCors(
                     co => co.AddPolicy(
@@ -84,7 +87,7 @@ namespace sp.auth.service
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, AuthDataContext dbContext)
         {
             if (env.IsDevelopment())
             {
@@ -97,6 +100,8 @@ namespace sp.auth.service
                 name:"default",
                 template:"api/{controller=Auth}/{action=Index}/{id?}"
             ));
+
+            dbContext.Database.EnsureCreated();
         }
     }
 }
