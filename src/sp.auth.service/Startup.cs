@@ -36,7 +36,7 @@ namespace sp.auth.service
                 .AddEnvironmentVariables()
                 .AddUserSecrets(env.EnvironmentName)
                 .AddJsonFile("appsettings.json")
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json")
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json",true)
                 .Build();
         }
 

@@ -1,0 +1,1 @@
+dotnet publish $(pwd)/../src/sp.auth.service/ -o $(pwd)/dist/sp.auth.service
