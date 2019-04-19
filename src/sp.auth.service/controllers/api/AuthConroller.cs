@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using System.Net;
+using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
@@ -99,10 +101,21 @@ namespace sp.auth.service.controllers.api
             return Ok();
         }
         
-        [HttpPost("getrenew")]
-        [AllowAnonymous]
-        public async Task<IActionResult> GetRenew([FromBody] GetRenewTokenQuery cmd)
+        [HttpGet("getrenew")]
+        public async Task<IActionResult> GetRenew()
         {
+            var claim = HttpContext.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Name);
+
+            if (claim == null )
+            {
+                return BadRequest();
+            }
+
+            var cmd = new GetRenewTokenQuery()
+            {
+                AccountId = long.Parse(claim.Value)
+            };
+
             var res = await _mediator.Send(cmd);
 
             return Ok(res);
