@@ -9,6 +9,7 @@ using Microsoft.Extensions.Logging;
 using sp.auth.app.account.commands.authenticate;
 using sp.auth.app.account.commands.create;
 using sp.auth.app.account.commands.renew;
+using sp.auth.app.account.queries.GetRenewToken;
 using sp.auth.app.infra.config;
 
 namespace sp.auth.service.controllers.api
@@ -84,18 +85,28 @@ namespace sp.auth.service.controllers.api
         [AllowAnonymous]
         public async Task<IActionResult> Authenticate([FromBody] AuthenticateAccountCommand cmd)
         {
-            var res = await _mediator.Send(cmd);
+            await _mediator.Send(cmd);
 
-            return Ok(res);
+            return Ok();
         }
         
         [HttpPost("renew")]
         [AllowAnonymous]
         public async Task<IActionResult> Renew([FromBody] RenewAccountSessionCommand cmd)
         {
+            await _mediator.Send(cmd);
+
+            return Ok();
+        }
+        
+        [HttpPost("getrenew")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetRenew([FromBody] GetRenewTokenQuery cmd)
+        {
             var res = await _mediator.Send(cmd);
 
             return Ok(res);
         }
+        
     }
 }
