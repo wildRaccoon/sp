@@ -33,7 +33,6 @@ namespace sp.auth.persistence.account.handlers
                 Subject = new ClaimsIdentity(new Claim[] 
                 {
                     new Claim(ClaimTypes.Name, notification.AccId.ToString()),
-                    new Claim(CustomClaims.RenewToken, notification.RenewToken),
                     new Claim(ClaimTypes.Role, notification.Role) 
                 }),
                 
