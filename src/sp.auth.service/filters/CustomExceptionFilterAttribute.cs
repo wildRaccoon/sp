@@ -22,16 +22,20 @@ namespace sp.auth.service.filters
                 return;
             }
 
+            if (context.Exception is UnauthorizedException)
+            {
+                context.HttpContext.Response.StatusCode = (int) HttpStatusCode.Unauthorized;
+                context.HttpContext.Response.ContentType = "application/json";
+                context.Result = new JsonResult( new {});
+                return;
+            }
+            
             var code = HttpStatusCode.InternalServerError;
 
-            if (context.Exception is UnableCreateAccountException)
+            //throw from executed command
+            if (context.Exception is AccountException)
             {
                 code = HttpStatusCode.BadRequest;
-            }
-
-            if (context.Exception is UnableAuthoriseAccountException)
-            {
-                code = HttpStatusCode.Unauthorized;
             }
 
             context.HttpContext.Response.ContentType = "application/json";
