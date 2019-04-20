@@ -8,10 +8,11 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using sp.auth.app.account.commands.common;
 
 namespace sp.auth.app.account.commands.renew
 {
-    public class RenewAccountSessionCommandHandler : IRequestHandler<RenewAccountSessionCommand, Unit>
+    public class RenewAccountSessionCommandHandler : IRequestHandler<RenewAccountSessionCommand, RenewTokenModel>
     {
         private readonly ITokenService _token;
 
@@ -29,7 +30,7 @@ namespace sp.auth.app.account.commands.renew
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
-        public async Task<Unit> Handle(RenewAccountSessionCommand request, CancellationToken cancellationToken)
+        public async Task<RenewTokenModel> Handle(RenewAccountSessionCommand request, CancellationToken cancellationToken)
         {
             var session = _repo.AccountSessions.SingleOrDefault(s => s.AccountId == request.AccountId);
 
@@ -58,7 +59,7 @@ namespace sp.auth.app.account.commands.renew
 
             await _mediator.Publish(new RenewAccountSessionSuccessDomainEvent(request.AccountId, session.IssuedOn, session.RenewToken, session.SessionExpired, Roles.Account), cancellationToken);
 
-            return Unit.Value;
+            return RenewTokenModel.Create(session);
         }
     }
 }

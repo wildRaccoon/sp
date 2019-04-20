@@ -15,4 +15,9 @@
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="5.4.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="app\account\events" />
+    <Folder Include="app\account\queries" />
+  </ItemGroup>
+
 </Project>

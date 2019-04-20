@@ -1,7 +1,3 @@
-using System;
-using System.Linq;
-using System.Net;
-using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
 using MediatR;
@@ -11,7 +7,6 @@ using Microsoft.Extensions.Logging;
 using sp.auth.app.account.commands.authenticate;
 using sp.auth.app.account.commands.create;
 using sp.auth.app.account.commands.renew;
-using sp.auth.app.account.queries.GetRenewToken;
 using sp.auth.app.infra.config;
 
 namespace sp.auth.service.controllers.api
@@ -87,35 +82,15 @@ namespace sp.auth.service.controllers.api
         [AllowAnonymous]
         public async Task<IActionResult> Authenticate([FromBody] AuthenticateAccountCommand cmd)
         {
-            await _mediator.Send(cmd);
+            var res = await _mediator.Send(cmd);
 
-            return Ok();
+            return Ok(res);
         }
         
         [HttpPost("renew")]
         [AllowAnonymous]
         public async Task<IActionResult> Renew([FromBody] RenewAccountSessionCommand cmd)
         {
-            await _mediator.Send(cmd);
-
-            return Ok();
-        }
-        
-        [HttpGet("getrenew")]
-        public async Task<IActionResult> GetRenew()
-        {
-            var claim = HttpContext.User.Claims.FirstOrDefault(x => x.Type == ClaimTypes.Name);
-
-            if (claim == null )
-            {
-                return BadRequest();
-            }
-
-            var cmd = new GetRenewTokenQuery()
-            {
-                AccountId = long.Parse(claim.Value)
-            };
-
             var res = await _mediator.Send(cmd);
 
             return Ok(res);

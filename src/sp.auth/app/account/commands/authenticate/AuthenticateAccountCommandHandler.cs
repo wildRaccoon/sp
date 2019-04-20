@@ -3,6 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using Microsoft.EntityFrameworkCore;
+using sp.auth.app.account.commands.common;
 using sp.auth.app.infra.config;
 using sp.auth.app.infra.ef;
 using sp.auth.app.interfaces;
@@ -12,7 +13,7 @@ using sp.auth.domain.account.exceptions;
 
 namespace sp.auth.app.account.commands.authenticate
 {
-    public class AuthenticateAccountCommandHandler: IRequestHandler<AuthenticateAccountCommand, Unit>
+    public class AuthenticateAccountCommandHandler: IRequestHandler<AuthenticateAccountCommand, RenewTokenModel>
     {
         private readonly ITokenService _token;
         
@@ -30,7 +31,7 @@ namespace sp.auth.app.account.commands.authenticate
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
         
-        public async Task<Unit> Handle(AuthenticateAccountCommand request, CancellationToken cancellationToken)
+        public async Task<RenewTokenModel> Handle(AuthenticateAccountCommand request, CancellationToken cancellationToken)
         {
             var acc = await _repo.Accounts.SingleOrDefaultAsync(x => x.Alias == request.Alias, cancellationToken: cancellationToken);
             var hashOfPass = _hash.Encode(request.Password);
@@ -63,7 +64,7 @@ namespace sp.auth.app.account.commands.authenticate
 
             await _mediator.Publish(new AuthenticateSuccessAccountDomainEvent(acc.Id, session.IssuedOn, session.RenewToken, session.SessionExpired, Roles.Account), cancellationToken);
 
-            return Unit.Value;
+            return RenewTokenModel.Create(session);
         }
     }
 }

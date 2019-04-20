@@ -2,7 +2,7 @@ using System;
 using System.Linq.Expressions;
 using sp.auth.domain.account;
 
-namespace sp.auth.app.account.queries.GetRenewToken
+namespace sp.auth.app.account.commands.common
 {
     public class RenewTokenModel
     {
