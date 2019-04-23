@@ -95,6 +95,5 @@ namespace sp.auth.service.controllers.api
 
             return Ok(res);
         }
-        
     }
 }

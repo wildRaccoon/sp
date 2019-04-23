@@ -17,21 +17,29 @@ namespace sp.auth.app.account.commands.renew
         private readonly ITokenService _token;
 
         private readonly AuthenticateConfig _authConfig;
+        
+        private readonly IHttpContextService _httpContextService;
         private AuthDataContext _repo { get; }
-        private IHashService _hash { get; }
         private IMediator _mediator { get; }
 
-        public RenewAccountSessionCommandHandler(IMediator mediator, AuthDataContext repo, IHashService hash, ITokenService token, AuthenticateConfig authConfig)
+        public RenewAccountSessionCommandHandler(IMediator mediator, AuthDataContext repo, ITokenService token, AuthenticateConfig authConfig, IHttpContextService httpContextService)
         {
             _token = token ?? throw new ArgumentNullException(nameof(token));
             _authConfig = authConfig ?? throw new ArgumentNullException(nameof(authConfig));
+            _httpContextService = httpContextService ?? throw new ArgumentNullException(nameof(httpContextService));
             _repo = repo ?? throw new ArgumentNullException(nameof(repo));
-            _hash = hash ?? throw new ArgumentNullException(nameof(hash));
             _mediator = mediator ?? throw new ArgumentNullException(nameof(mediator));
         }
 
         public async Task<RenewTokenModel> Handle(RenewAccountSessionCommand request, CancellationToken cancellationToken)
         {
+            var accIdFromContext = _httpContextService.GetAccountIdFromContext();
+
+            if (accIdFromContext != request.AccountId)
+            {
+                throw new RenewAccountSessionException(request.AccountId, "operation not allowed");
+            }
+
             var session = _repo.AccountSessions.SingleOrDefault(s => s.AccountId == request.AccountId);
 
             if(session == null)

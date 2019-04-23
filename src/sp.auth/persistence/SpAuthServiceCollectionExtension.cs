@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using sp.auth.app.infra.behaviours;
 using sp.auth.app.infra.config;
 using sp.auth.app.interfaces;
+using sp.auth.persistence.services.context;
 using sp.auth.persistence.services.hash;
 using sp.auth.persistence.services.token;
 
@@ -17,6 +18,7 @@ namespace sp.auth.persistence
         {
             entity.TryAddSingleton<IHashService,HashService>();
             entity.TryAddSingleton<ITokenService,TokenService>();
+            entity.TryAddScoped<IHttpContextService,HttpContextService>();
 
             var cfg = new SpAuthConfig();
             conf.GetSection("sp.auth").Bind(cfg);

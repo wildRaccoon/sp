@@ -16,8 +16,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="app\account\events" />
     <Folder Include="app\account\queries" />
+    <Folder Include="persistence\services\handlers" />
   </ItemGroup>
 
 </Project>
