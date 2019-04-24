@@ -54,6 +54,8 @@ namespace sp.auth.app.account.commands.renew
 
             if (session.RenewExpired < DateTime.Now)
             {
+                _repo.Remove(session);
+                await _repo.SaveChangesAsync(cancellationToken);
                 throw new RenewAccountSessionException(request.AccountId, $"renew token expired");
             }
 

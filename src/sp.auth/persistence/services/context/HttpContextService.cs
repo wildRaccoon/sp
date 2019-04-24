@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using FluentValidation.Validators;
 using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore.Internal;
 using Microsoft.IdentityModel.Tokens;
 using sp.auth.app.infra.config;
 using sp.auth.app.interfaces;
@@ -16,6 +17,7 @@ namespace sp.auth.persistence.services.context
     {
         private IHttpContextAccessor _httpContextAccessor;
         private readonly HashConfig _hash;
+        private const string TokenIssuer = "sp.auth";
 
         public HttpContextService(IHttpContextAccessor httpContextAccessor, HashConfig hash)
         {
@@ -38,7 +40,7 @@ namespace sp.auth.persistence.services.context
                 }),
                 
                 Expires = expired,
-                Issuer = "sp.auth",
+                Issuer = TokenIssuer,
                 IssuedAt = issuedOn,
                 NotBefore = issuedOn,
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
@@ -51,16 +53,53 @@ namespace sp.auth.persistence.services.context
             await Task.CompletedTask;
         }
 
+        public TokenValidationParameters GetTokenValidationParameters(bool validateLifetime = true)
+        {
+            var key = Encoding.ASCII.GetBytes(_hash.secret);
+
+            return new TokenValidationParameters()
+            {
+                ValidateIssuer = true,
+                ValidIssuer = TokenIssuer,
+                RequireExpirationTime = true,
+                ValidateLifetime = validateLifetime,
+                RequireSignedTokens = true,
+                IssuerSigningKey = new SymmetricSecurityKey(key),
+                ValidateIssuerSigningKey = true,
+                ValidateAudience = false
+            };
+        }
+
         public long GetAccountIdFromContext()
         {
-            var claims = _httpContextAccessor.HttpContext?.User?.Claims;
+            var authHeader = _httpContextAccessor.HttpContext?.Request?.Headers["Authorization"];
 
-            if (claims == null)
+            if (!authHeader.HasValue)
             {
-                throw new NullReferenceException("Claims not available.");
+                throw new NullReferenceException("Not allowed.");
             }
 
-            var cname = claims.SingleOrDefault(x => x.Type == ClaimTypes.Name);
+            var authValue = authHeader.GetValueOrDefault(string.Empty).ToString();
+
+            if (string.IsNullOrEmpty(authValue))
+            {
+                throw new NullReferenceException("Not allowed.");
+            }
+
+            if (!authValue.StartsWith("Bearer"))
+            {
+                throw new NullReferenceException("Not allowed.");
+                
+            }
+
+            authValue = authValue.Substring(7);
+            
+
+            SecurityToken tokenOut = null;
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var principal = tokenHandler.ValidateToken(authValue,GetTokenValidationParameters(false), out tokenOut);
+
+            var cname = principal.Claims.SingleOrDefault(x => x.Type == ClaimTypes.Name);
             
             if (cname == null)
             {
