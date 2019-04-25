@@ -31,7 +31,7 @@ namespace sp.auth.persistence.services.context
             
             var tokenDescriptor = new SecurityTokenDescriptor
             {
-                Subject = new ClaimsIdentity(new Claim[] 
+                Subject = new ClaimsIdentity(new [] 
                 {
                     new Claim(ClaimTypes.Name, accountId.ToString()),
                     new Claim(ClaimTypes.Role, role) 
@@ -51,11 +51,11 @@ namespace sp.auth.persistence.services.context
             await Task.CompletedTask;
         }
 
-        public TokenValidationParameters GetTokenValidationParameters(bool validateLifetime = true)
+        private TokenValidationParameters GetTokenValidationParameters(bool validateLifetime = true)
         {
             var key = Encoding.ASCII.GetBytes(_hash.secret);
 
-            return new TokenValidationParameters()
+            return new TokenValidationParameters
             {
                 ValidateIssuer = true,
                 ValidIssuer = TokenIssuer,
@@ -91,11 +91,10 @@ namespace sp.auth.persistence.services.context
             }
 
             authValue = authValue.Substring(7);
-            
 
-            SecurityToken tokenOut = null;
+
             var tokenHandler = new JwtSecurityTokenHandler();
-            var principal = tokenHandler.ValidateToken(authValue,GetTokenValidationParameters(false), out tokenOut);
+            var principal = tokenHandler.ValidateToken(authValue,GetTokenValidationParameters(false), out _);
 
             var cname = principal.Claims.SingleOrDefault(x => x.Type == ClaimTypes.Name);
             
@@ -104,9 +103,7 @@ namespace sp.auth.persistence.services.context
                 throw new NullReferenceException("Claims not available.");
             }
 
-            long id = 0;
-
-            if (!long.TryParse(cname.Value, out id))
+            if (!long.TryParse(cname.Value, out var id))
             {
                 throw new NullReferenceException($"Invalid claim value:{cname.Value}.");
             }

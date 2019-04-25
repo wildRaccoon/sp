@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
-using Microsoft.Extensions.Logging;
 using sp.auth.app.infra.config;
 using sp.auth.app.interfaces;
 
@@ -10,23 +9,21 @@ namespace sp.auth.persistence.services.hash
 {
     public class HashService : IHashService
     {
-        private readonly ILogger<HashService> _logger;
         private readonly HashConfig _hashConfig;
         private HashAlgorithm _hashAlgorithm = null;
 
-        public HashService(ILogger<HashService> logger, HashConfig hashConfig)
+        public HashService(HashConfig hashConfig)
         {
-            _logger = logger;
-            _hashConfig = hashConfig ?? throw new ArgumentNullException(nameof(hashConfig));;
+            _hashConfig = hashConfig ?? throw new ArgumentNullException(nameof(hashConfig));
 
             if (string.IsNullOrEmpty(_hashConfig.salt))
             {
                 throw new KeyNotFoundException($"Salt not set in secret: sp.auth.authenticate.Salt");
             }
             
-            var _saltAlg = _hashConfig.algorithm?.ToLower() ?? "";
+            var saltAlg = _hashConfig.algorithm?.ToLower() ?? "";
 
-            switch (_saltAlg)
+            switch (saltAlg)
             {
                 case "sha256":
                     _hashAlgorithm = SHA256.Create();
