@@ -68,7 +68,17 @@ namespace sp.auth.persistence.services.context
             };
         }
 
-        public long GetAccountIdFromContext()
+        private ClaimsPrincipal ValidateToken(string authValue,bool validateLifetime = true)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            return tokenHandler.ValidateToken
+                (
+                    authValue,GetTokenValidationParameters(validateLifetime), 
+                    out _
+                );
+        }
+
+        private string GetTokenFromContext()
         {
             var authHeader = _httpContextAccessor.HttpContext?.Request?.Headers["Authorization"];
 
@@ -92,10 +102,16 @@ namespace sp.auth.persistence.services.context
 
             authValue = authValue.Substring(7);
 
+            return authValue;
+        }
 
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var principal = tokenHandler.ValidateToken(authValue,GetTokenValidationParameters(false), out _);
-
+        public long GetAccountIdFromContext()
+        {
+            var authValue = GetTokenFromContext();
+            
+            //try to get account id from context even it's lifetime check not passed
+            var principal = ValidateToken(authValue, false);
+            
             var cname = principal.Claims.SingleOrDefault(x => x.Type == ClaimTypes.Name);
             
             if (cname == null)
@@ -109,6 +125,12 @@ namespace sp.auth.persistence.services.context
             }
 
             return id;
+        }
+
+        public ClaimsPrincipal Validate(bool validateLifetime)
+        {
+            var authValue = GetTokenFromContext();
+            return ValidateToken(authValue,validateLifetime);
         }
     }
 }

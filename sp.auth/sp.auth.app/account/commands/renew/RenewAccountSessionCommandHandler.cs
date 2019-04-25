@@ -8,6 +8,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.EntityFrameworkCore;
 using sp.auth.app.account.commands.common;
 
 namespace sp.auth.app.account.commands.renew
@@ -15,12 +16,10 @@ namespace sp.auth.app.account.commands.renew
     public class RenewAccountSessionCommandHandler : IRequestHandler<RenewAccountSessionCommand, RenewTokenModel>
     {
         private readonly ITokenService _token;
-
         private readonly AuthenticateConfig _authConfig;
-        
         private readonly IHttpContextService _httpContextService;
-        private AuthDataContext _repo { get; }
-        private IMediator _mediator { get; }
+        private AuthDataContext _repo;
+        private IMediator _mediator;
 
         public RenewAccountSessionCommandHandler(IMediator mediator, AuthDataContext repo, ITokenService token, AuthenticateConfig authConfig, IHttpContextService httpContextService)
         {
@@ -63,11 +62,13 @@ namespace sp.auth.app.account.commands.renew
             session.SessionExpired = DateTime.Now.AddSeconds(_authConfig.sessionExpiredInSec);
             session.RenewToken = _token.IssueToken();
 
+            var acc = await _repo.Accounts.SingleAsync(x => x.Id == accIdFromContext, cancellationToken);
+
             _repo.AccountSessions.Update(session);
 
             await _repo.SaveChangesAsync(cancellationToken);
 
-            await _mediator.Publish(new RenewAccountSessionSuccessDomainEvent(request.AccountId, session.IssuedOn, session.RenewToken, session.SessionExpired, Roles.Account), cancellationToken);
+            await _mediator.Publish(new RenewAccountSessionSuccessDomainEvent(request.AccountId, session.IssuedOn, session.RenewToken, session.SessionExpired, acc.Role), cancellationToken);
 
             return RenewTokenModel.Create(session);
         }

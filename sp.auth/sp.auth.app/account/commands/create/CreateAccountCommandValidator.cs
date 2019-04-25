@@ -1,6 +1,6 @@
 using FluentValidation;
-using System;
 using System.Linq;
+using sp.auth.common.constraints;
 
 namespace sp.auth.app.account.commands.create
 {
@@ -18,6 +18,11 @@ namespace sp.auth.app.account.commands.create
             .NotEmpty()
             .MinimumLength(8)
             .MaximumLength(50);
+
+            RuleFor(x => x.Role)
+                .NotNull()
+                .NotEmpty()
+                .Must(val => val == Roles.Account || val == Roles.Admin || val == Roles.Manager );
 
             RuleFor(x => x.Password)
             .Must(val => {

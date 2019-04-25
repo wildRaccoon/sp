@@ -2,7 +2,6 @@ using System;
 using System.Threading;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Xml.Linq;
 using MediatR;
 using sp.auth.app.interfaces;
 using sp.auth.domain.account;
@@ -39,7 +38,8 @@ namespace sp.auth.app.account.commands.create
                 Email = request.Email,
                 IsLocked = false,
                 CreatedOn = DateTime.Now,
-                PasswordHash = _hash.Encode(request.Password)
+                PasswordHash = _hash.Encode(request.Password),
+                Role = request.Role
             };
 
             _repo.Add(acc);

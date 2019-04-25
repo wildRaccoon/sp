@@ -13,6 +13,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\sp.auth.common\sp.auth.common.csproj" />
     <ProjectReference Include="..\sp.auth.persistence\sp.auth.persistence.csproj" />
   </ItemGroup>
 

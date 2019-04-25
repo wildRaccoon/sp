@@ -10,5 +10,7 @@ namespace sp.auth.domain.account
         public string PasswordHash { get; set; }
         public bool IsLocked { get; set; }
         public DateTime CreatedOn {get; set;}
+        
+        public string Role {get; set;}
     }
 }

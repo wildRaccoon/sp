@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using sp.auth.app.account.commands.authenticate;
 using sp.auth.app.account.commands.create;
 using sp.auth.app.account.commands.renew;
-using sp.auth.app.infra.config;
+using sp.auth.service.filters;
 
 namespace sp.auth.service.controllers.api
 {
@@ -23,16 +23,16 @@ namespace sp.auth.service.controllers.api
             _mediator = mediator;
         }
 
-        [HttpGet("index")]
+        [HttpGet("ping")]
         [AllowAnonymous]
-        public object Index()
+        public IActionResult Ping()
         {
-            return "hello";
+            return Ok("Ok");
         }
         
-        [HttpGet("secured")]
+        [HttpGet("who")]
         [Authorize]
-        public object Secured()
+        public IActionResult Who()
         {
             var sb = new StringBuilder();
 
@@ -45,29 +45,12 @@ namespace sp.auth.service.controllers.api
                 sb.Append($"{i.Type} : {i.Value}\r\n");
             }
             
-            return sb.ToString();
-        }
-        
-        [HttpGet("SecuredAdmin")]
-        [Authorize(Roles = Roles.Admin)]
-        public object SecuredAdmin()
-        {
-            var sb = new StringBuilder();
-
-            sb.Append("you are here\r\n");
-            
-            var claims = HttpContext.User.Claims;
-
-            foreach (var i in claims)
-            {
-                sb.Append($"{i.Type} : {i.Value}\r\n");
-            }
-            
-            return sb.ToString();
+            return Ok(sb.ToString());
         }
 
         [HttpPost("create")]
         [AllowAnonymous]
+        [CreateActionFilter]
         public async Task<IActionResult> Create([FromBody] CreateAccountCommand cmd)
         {
             var res = await _mediator.Send(cmd);

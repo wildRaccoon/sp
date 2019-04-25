@@ -62,7 +62,7 @@ namespace sp.auth.app.account.commands.authenticate
             _repo.AccountSessions.Add(session);
             await _repo.SaveChangesAsync(cancellationToken);
 
-            await _mediator.Publish(new AuthenticateSuccessAccountDomainEvent(acc.Id, session.IssuedOn, session.RenewToken, session.SessionExpired, Roles.Account), cancellationToken);
+            await _mediator.Publish(new AuthenticateSuccessAccountDomainEvent(acc.Id, session.IssuedOn, session.RenewToken, session.SessionExpired, acc.Role), cancellationToken);
 
             return RenewTokenModel.Create(session);
         }
