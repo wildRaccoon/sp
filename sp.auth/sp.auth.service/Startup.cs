@@ -10,8 +10,10 @@ using Microsoft.IdentityModel.Tokens;
 using sp.auth.app.infra.config;
 using sp.auth.persistence;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using sp.auth.app.infra.ef;
 using sp.auth.service.filters;
+using sp.auth.service.health;
 
 namespace sp.auth.service
 {
@@ -74,6 +76,9 @@ namespace sp.auth.service
                 .AddHttpContextAccessor()
                 .AddMvc(opt => opt.Filters.Add<CustomExceptionFilterAttribute>())
                 .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<SpAuthConfig>());
+
+            services.AddHealthChecks()
+                .AddCheck<DbConnectionHealthCheck>("DbConnection");
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -84,12 +89,13 @@ namespace sp.auth.service
                 app.UseDeveloperExceptionPage();
             }
 
-            app.UseAuthentication();
-            app.UseCors();
-            app.UseMvc(routes => routes.MapRoute(
-                name:"default",
-                template:"api/{controller=Auth}/{action=Index}/{id?}"
-            ));
+            app.UseAuthentication()
+                .UseCors()
+                .UseMvc(routes => routes.MapRoute(
+                    name:"default",
+                    template:"api/{controller=Auth}/{action=Index}/{id?}"
+                ))
+                .UseHealthChecks("/_hc");
 
             dbContext.Database.EnsureCreated();
         }
