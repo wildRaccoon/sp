@@ -25,9 +25,13 @@ namespace sp.wallet.service
                 app.UseDeveloperExceptionPage();
             }
 
+            var maxTimeStamp = DateTimeOffset.FromUnixTimeMilliseconds(253402300799999);
+
             app.Run(async (context) =>
             {
-                await context.Response.WriteAsync("Hello World!");
+                var current = DateTimeOffset.UtcNow;
+                var maxDate = new DateTime(maxTimeStamp.Ticks,DateTimeKind.Utc).ToLocalTime();
+                await context.Response.WriteAsync($"{current.ToUnixTimeMilliseconds()} - {current.ToUnixTimeSeconds()} - {maxDate.ToLongDateString()} {maxDate.ToLongTimeString()}");
             });
         }
     }
